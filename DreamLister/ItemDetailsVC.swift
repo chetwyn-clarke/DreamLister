@@ -20,6 +20,9 @@ class ItemDetailsVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSou
     //Need an array of Stores to use for the picker view.
     var stores = [Store]()
     
+    //Item to edit passed from MainVC
+    var itemToEdit: Item?
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,6 +40,11 @@ class ItemDetailsVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSou
         
         //generateStores()
         getStores()
+        
+        //Check to see if it is an item to edit, or a new item to save that we are dealing with.  If it is an item to edit, we need to load its data.
+        if itemToEdit != nil {
+            loadItemData()
+        }
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -61,12 +69,44 @@ class ItemDetailsVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSou
         return 1
     }
     
+    func loadItemData() {
+        
+        if let item = itemToEdit {
+            titleField.text = item.title
+            priceField.text = "\(item.price)"
+            detailsField.text = item.details
+            
+            //Set the picker
+            if let store = item.store {
+                var index = 0
+                repeat {
+                    let s = stores[index]
+                    if s.name == store.name {
+                        storePicker.selectRow(index, inComponent: 0, animated: false)
+                        break
+                    }
+                    index += 1
+                } while (index < stores.count)
+            }
+        }
+    }
+    
     @IBAction func addImage(_ sender: UIButton) {
     }
     
     @IBAction func savePressed(_ sender: UIButton) {
         
-        let item = Item(context: context)
+        var item: Item!
+        
+        
+        //Part two of checking to see if the item on this screen is one that is to be edited, or if we are creating a new one.
+        if itemToEdit == nil {
+            item = Item(context: context)
+        } else {
+            item = itemToEdit
+        }
+        
+        
         
         if let title = titleField.text {
             item.title = title
@@ -89,6 +129,8 @@ class ItemDetailsVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSou
     
     @IBAction func deleteBtnPressed(_ sender: UIBarButtonItem) {
     }
+    
+    
     
     func generateStores() {
         
@@ -122,6 +164,8 @@ class ItemDetailsVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSou
             //handle error
         }
     }
+    
+    
 
 
 }
